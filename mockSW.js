@@ -52,7 +52,10 @@ self.addEventListener('fetch', (event) => {
 });
 
 async function handleApiRequest(request, url) {
-  const path = url.pathname;
+  let path = url.pathname;
+  if (path.includes('/api/')) {
+      path = path.substring(path.indexOf('/api/'));
+  }
   const method = request.method;
 
   // Handle Authentication Mock
@@ -111,9 +114,29 @@ async function handleApiRequest(request, url) {
       return jsonResponse({ message: 'Checked out in Demo Mode!', receipt_id: transaction.id });
   }
 
-  // Ledgers
+  // Ledgers & Master Data
   if (path === '/api/sales' && method === 'GET') return jsonResponse(demoSales.slice().reverse());
   if (path === '/api/inventory' && method === 'GET') return jsonResponse({ data: demoProducts });
+  if (path === '/api/countries' && method === 'GET') {
+      return jsonResponse([
+          { id: 1, name: 'United States', currency_code: 'USD', currency_symbol: '$', tax_name: 'Sales Tax', default_tax_rate: 7.25 },
+          { id: 2, name: 'India', currency_code: 'INR', currency_symbol: '₹', tax_name: 'GST', default_tax_rate: 18.00 },
+          { id: 3, name: 'United Kingdom', currency_code: 'GBP', currency_symbol: '£', tax_name: 'VAT', default_tax_rate: 20.00 },
+          { id: 4, name: 'Nepal', currency_code: 'NPR', currency_symbol: 'Rs', tax_name: 'VAT', default_tax_rate: 13.00 },
+          { id: 5, name: 'Australia', currency_code: 'AUD', currency_symbol: 'A$', tax_name: 'GST', default_tax_rate: 10.00 },
+          { id: 6, name: 'Canada', currency_code: 'CAD', currency_symbol: 'C$', tax_name: 'GST', default_tax_rate: 5.00 },
+          { id: 7, name: 'Singapore', currency_code: 'SGD', currency_symbol: 'S$', tax_name: 'GST', default_tax_rate: 9.00 },
+          { id: 8, name: 'United Arab Emirates', currency_code: 'AED', currency_symbol: 'د.إ', tax_name: 'VAT', default_tax_rate: 5.00 },
+          { id: 9, name: 'Pakistan', currency_code: 'PKR', currency_symbol: '₨', tax_name: 'GST', default_tax_rate: 17.00 },
+          { id: 10, name: 'Bangladesh', currency_code: 'BDT', currency_symbol: '৳', tax_name: 'VAT', default_tax_rate: 15.00 },
+          { id: 11, name: 'Sri Lanka', currency_code: 'LKR', currency_symbol: 'Rs', tax_name: 'VAT', default_tax_rate: 18.00 },
+          { id: 12, name: 'Malaysia', currency_code: 'MYR', currency_symbol: 'RM', tax_name: 'SST', default_tax_rate: 6.00 },
+          { id: 13, name: 'Philippines', currency_code: 'PHP', currency_symbol: '₱', tax_name: 'VAT', default_tax_rate: 12.00 },
+          { id: 14, name: 'Saudi Arabia', currency_code: 'SAR', currency_symbol: '﷼', tax_name: 'VAT', default_tax_rate: 15.00 },
+          { id: 15, name: 'South Africa', currency_code: 'ZAR', currency_symbol: 'R', tax_name: 'VAT', default_tax_rate: 15.00 },
+          { id: 16, name: 'New Zealand', currency_code: 'NZD', currency_symbol: 'NZ$', tax_name: 'GST', default_tax_rate: 15.00 }
+      ]);
+  }
   if (path === '/api/suppliers' && method === 'GET') return jsonResponse(demoSuppliers);
   if (path.match(/^\/api\/suppliers\/\d+$/) && method === 'GET') {
       const id = parseInt(path.split('/').pop());
@@ -124,7 +147,28 @@ async function handleApiRequest(request, url) {
   if (path === '/api/purchase-orders' && method === 'GET') return jsonResponse(demoPurchases);
   if (path === '/api/purchase-orders' && method === 'POST') {
       const payload = await request.clone().json();
-      const newPO = { ...payload, id: demoPurchases.length + 1, created_at: new Date().toISOString() };
+      
+      // The real backend maps items to inventory_batches recursively with product relations.
+      // We manually construct a fake relationship here so the Demo Receipt UI works out of the box.
+      const mappedBatches = payload.items.map((item, idx) => ({
+          id: Date.now() + idx,
+          product: { brand_name: item.brand_name },
+          batch_number: item.batch_number,
+          expiry_date: item.expiry_date,
+          cost_price: item.cost_price,
+          quantity_received: item.quantity,
+          free_quantity: item.free_quantity || 0,
+          discount_percent: item.discount_percent || 0,
+          exchange_rate: item.exchange_rate || 1.0
+      }));
+
+      const newPO = { 
+          ...payload, 
+          id: demoPurchases.length + 1, 
+          created_at: new Date().toISOString(),
+          inventory_batches: mappedBatches
+      };
+      
       demoPurchases.push(newPO);
       return jsonResponse({ message: 'Saved Purchase Order (Demo)', purchase_order: newPO });
   }
