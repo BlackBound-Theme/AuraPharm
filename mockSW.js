@@ -19,16 +19,16 @@ let demoProducts = [
     id: 1, batch_number: 'B-001X', stock_current: 120, selling_price: 5.99, cost_price: 1.50, expiry_date: '2028-12-01',
     product: { id: 1, brand_name: 'Paracetamol 500mg', generic_name: 'Acetaminophen', category: 'Pain Relief' }
   },
-  { 
-    id: 2, batch_number: 'A-229P', stock_current: 50, selling_price: 12.50, cost_price: 4.00, expiry_date: '2025-05-15',
+  { // CRITICAL LOW STOCK
+    id: 2, batch_number: 'A-229P', stock_current: 5, selling_price: 12.50, cost_price: 4.00, expiry_date: '2028-05-15',
     product: { id: 2, brand_name: 'Amoxicillin 250mg', generic_name: 'Amoxicillin Trihydrate', category: 'Antibiotics' }
   },
-  { 
-    id: 3, batch_number: 'V-991C', stock_current: 200, selling_price: 18.00, cost_price: 6.00, expiry_date: '2027-01-20',
+  { // EXPIRING SOON (<30 days from 2026-03-26)
+    id: 3, batch_number: 'V-991C', stock_current: 200, selling_price: 18.00, cost_price: 6.00, expiry_date: '2026-04-10',
     product: { id: 3, brand_name: 'Vitamin C Plus Zinc', generic_name: 'Ascorbic Acid + Zinc', category: 'Vitamins' }
   },
-  { 
-    id: 4, batch_number: 'I-400X', stock_current: 85, selling_price: 8.99, cost_price: 2.20, expiry_date: '2029-03-10',
+  { // EXPIRED
+    id: 4, batch_number: 'I-400X', stock_current: 85, selling_price: 8.99, cost_price: 2.20, expiry_date: '2025-10-01',
     product: { id: 4, brand_name: 'Ibuprofen 400mg', generic_name: 'Ibuprofen', category: 'Pain Relief' }
   },
   { 
@@ -37,12 +37,54 @@ let demoProducts = [
   },
 ];
 
-let demoSales = [];
+let demoSales = [
+    {
+        id: 101, created_at: '2026-03-24T14:30:00Z', receipt_number: 'RCPT-99801', patient_name: 'Marcus Vance', patient_phone: '+1 555-0198',
+        total_paid: 23.98, discount_amount: 0, status: 'Completed',
+        items: [
+            { id: 1, inventory_batch_id: 1, name: 'Paracetamol 500mg Acetaminophen', quantity: 4, unit_price: 5.995 }
+        ]
+    },
+    {
+        id: 102, created_at: '2026-03-25T09:15:00Z', receipt_number: 'RCPT-99802', patient_name: 'Sarah Connor', patient_phone: '+1 555-8821',
+        total_paid: 49.50, discount_amount: 5.00, status: 'Completed',
+        items: [
+            { id: 2, inventory_batch_id: 5, name: 'Band-Aid Tough Strips Bandage', quantity: 2, unit_price: 4.50 },
+            { id: 3, inventory_batch_id: 3, name: 'Vitamin C Plus Zinc Ascorbic Acid + Zinc', quantity: 2, unit_price: 18.00 }
+        ]
+    },
+    {
+        id: 103, created_at: '2026-03-26T11:45:00Z', receipt_number: 'RCPT-99803', patient_name: 'Walk-in Customer', patient_phone: 'N/A',
+        total_paid: 12.50, discount_amount: 0, status: 'Completed',
+        items: [
+            { id: 4, inventory_batch_id: 2, name: 'Amoxicillin 250mg Amoxicillin Trihydrate', quantity: 1, unit_price: 12.50 }
+        ]
+    }
+];
+
 let demoSuppliers = [
   { id: 1, name: 'PharmaCorp Global', registration_number: 'PAN-100293', phone: '1-800-PHARMA', email: 'sales@pharmacorp.com', address: 'London, UK', total_purchased: 45000, total_paid: 40000, total_due: 5000 },
   { id: 2, name: 'Medistore Logistics', registration_number: 'GST-99281', phone: '1-800-MEDIS', email: 'orders@medistore.com', address: 'Delhi, IN', total_purchased: 12000, total_paid: 12000, total_due: 0 },
+  { id: 3, name: 'Aura Manufacturing', registration_number: 'VAT-88214', phone: '1-800-AURA', email: 'billing@auramfg.net', address: 'New York, US', total_purchased: 8500, total_paid: 2000, total_due: 6500 }
 ];
-let demoPurchases = [];
+
+let demoPurchases = [
+    {
+        id: 501, created_at: '2026-02-15T10:00:00Z', bill_number: 'INV-PHG-2026A', supplier_company: 'PharmaCorp Global',
+        subtotal: 1050.00, discount_amount: 50.00, total_amount: 1000.00,
+        inventory_batches: [
+            { id: 1, batch_number: 'B-001X', expiry_date: '2028-12-01', cost_price: 1.50, exchange_rate: 1.0, quantity_received: 500, free_quantity: 0, discount_percent: 4.76, product: { brand_name: 'Paracetamol 500mg' } },
+            { id: 3, batch_number: 'V-991C', expiry_date: '2026-04-10', cost_price: 6.00, exchange_rate: 1.0, quantity_received: 50, free_quantity: 5, discount_percent: 0, product: { brand_name: 'Vitamin C Plus Zinc' } }
+        ]
+    },
+    {
+        id: 502, created_at: '2026-03-10T14:20:00Z', bill_number: 'MD-88129', supplier_company: 'Medistore Logistics',
+        subtotal: 400.00, discount_amount: 0.00, total_amount: 400.00,
+        inventory_batches: [
+            { id: 2, batch_number: 'A-229P', expiry_date: '2028-05-15', cost_price: 4.00, exchange_rate: 1.0, quantity_received: 100, free_quantity: 0, discount_percent: 0, product: { brand_name: 'Amoxicillin 250mg' } }
+        ]
+    }
+];
 
 // Install Event
 self.addEventListener('install', (event) => {
@@ -199,16 +241,30 @@ async function handleApiRequest(request, url) {
 
   // Analytics
   if (path === '/api/analytics/dashboard' && method === 'GET') {
+      const now = new Date();
+      now.setHours(0,0,0,0);
+      const thirtyDays = new Date(now);
+      thirtyDays.setDate(thirtyDays.getDate() + 30);
+      
+      let expired = 0, expiring = 0, lowStock = 0;
+      demoProducts.forEach(p => {
+          if (p.stock_current < 20) lowStock++;
+          const d = new Date(p.expiry_date);
+          if (d < now) expired++;
+          else if (d <= thirtyDays) expiring++;
+      });
+
       return jsonResponse({
-          daily_sales: demoSales.reduce((acc, curr) => acc + curr.total_paid, 0) + 12500, // starting baseline
+          daily_sales: demoSales.reduce((acc, curr) => acc + curr.total_paid, 0) + 1420,
           profit_margin: 62.4,
-          kpi: { gross_revenue: 12500, total_cost: 4700, total_tax: 1560, net_profit: 6240 },
+          kpi: { gross_revenue: 1420 + demoSales.reduce((a, c) => a + c.total_paid, 0), total_cost: 800, total_tax: 120, net_profit: 500 },
           fastest_movers: [
               { brand_name: 'Paracetamol 500mg', total_sold: 450, total_revenue: 2695 },
               { brand_name: 'Vitamin C Plus Zinc', total_sold: 120, total_revenue: 2160 }
           ],
-          expiring_count: 5,
-          expired_count: 1
+          expiring_count: expiring,
+          expired_count: expired,
+          low_stock_count: lowStock
       });
   }
 
