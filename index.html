@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Vyloxia POS - Live Static Demo</title>
+    <!-- CSS Injection from Vite -->
+    <link rel="stylesheet" href="./build/assets/app-a7LRaW_8.css">
+    <style>
+        body { background: #0f172a; color: white; margin: 0; font-family: ui-sans-serif, system-ui, sans-serif; }
+    </style>
+</head>
+<body>
+    <div id="app"></div>
+
+    <script>
+        // Intercept Laravel API calls using our Virtual Backend Service Worker
+        if ("serviceWorker" in navigator) {
+            window.addEventListener("load", () => {
+                // Register using relative path strictly for GitHub Subfolders
+                navigator.serviceWorker.register("./mockSW.js").then(registration => {
+                    console.log("Vyloxia Demo ServiceWorker registered seamlessly!");
+                }).catch(error => {
+                    console.log("ServiceWorker registration failed: ", error);
+                });
+            });
+        }
+    </script>
+    
+    <!-- JS Injection from Vite -->
+    <script type="module" src="./build/assets/app-DzBJcaa2.js"></script>
+</body>
+</html>
