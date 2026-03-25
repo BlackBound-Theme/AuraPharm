@@ -15,11 +15,26 @@ let demoSettings = {
 const demoCategories = ['Pain Relief', 'Antibiotics', 'Vitamins', 'First Aid', 'Skincare'];
 
 let demoProducts = [
-  { id: 1, product_id: 1, brand_name: 'Paracetamol 500mg', generic_name: 'Acetaminophen', category: 'Pain Relief', stock_current: 120, selling_price: 5.99, cost_price: 1.50, batch_number: 'B-001X', expiry_date: '2028-12-01' },
-  { id: 2, product_id: 2, brand_name: 'Amoxicillin 250mg', generic_name: 'Amoxicillin Trihydrate', category: 'Antibiotics', stock_current: 50, selling_price: 12.50, cost_price: 4.00, batch_number: 'A-229P', expiry_date: '2025-05-15' },
-  { id: 3, product_id: 3, brand_name: 'Vitamin C Plus Zinc', generic_name: 'Ascorbic Acid + Zinc', category: 'Vitamins', stock_current: 200, selling_price: 18.00, cost_price: 6.00, batch_number: 'V-991C', expiry_date: '2027-01-20' },
-  { id: 4, product_id: 4, brand_name: 'Ibuprofen 400mg', generic_name: 'Ibuprofen', category: 'Pain Relief', stock_current: 85, selling_price: 8.99, cost_price: 2.20, batch_number: 'I-400X', expiry_date: '2029-03-10' },
-  { id: 5, product_id: 5, brand_name: 'Band-Aid Tough Strips', generic_name: 'Bandage', category: 'First Aid', stock_current: 300, selling_price: 4.50, cost_price: 1.00, batch_number: 'BA-T01', expiry_date: '2030-01-01' },
+  { 
+    id: 1, batch_number: 'B-001X', stock_current: 120, selling_price: 5.99, cost_price: 1.50, expiry_date: '2028-12-01',
+    product: { id: 1, brand_name: 'Paracetamol 500mg', generic_name: 'Acetaminophen', category: 'Pain Relief' }
+  },
+  { 
+    id: 2, batch_number: 'A-229P', stock_current: 50, selling_price: 12.50, cost_price: 4.00, expiry_date: '2025-05-15',
+    product: { id: 2, brand_name: 'Amoxicillin 250mg', generic_name: 'Amoxicillin Trihydrate', category: 'Antibiotics' }
+  },
+  { 
+    id: 3, batch_number: 'V-991C', stock_current: 200, selling_price: 18.00, cost_price: 6.00, expiry_date: '2027-01-20',
+    product: { id: 3, brand_name: 'Vitamin C Plus Zinc', generic_name: 'Ascorbic Acid + Zinc', category: 'Vitamins' }
+  },
+  { 
+    id: 4, batch_number: 'I-400X', stock_current: 85, selling_price: 8.99, cost_price: 2.20, expiry_date: '2029-03-10',
+    product: { id: 4, brand_name: 'Ibuprofen 400mg', generic_name: 'Ibuprofen', category: 'Pain Relief' }
+  },
+  { 
+    id: 5, batch_number: 'BA-T01', stock_current: 300, selling_price: 4.50, cost_price: 1.00, expiry_date: '2030-01-01',
+    product: { id: 5, brand_name: 'Band-Aid Tough Strips', generic_name: 'Bandage', category: 'First Aid' }
+  },
 ];
 
 let demoSales = [];
@@ -116,7 +131,16 @@ async function handleApiRequest(request, url) {
 
   // Ledgers & Master Data
   if (path === '/api/sales' && method === 'GET') return jsonResponse(demoSales.slice().reverse());
-  if (path === '/api/inventory' && method === 'GET') return jsonResponse({ data: demoProducts });
+  if (path === '/api/inventory' && method === 'GET') {
+      let results = [...demoProducts];
+      const urlObj = new URL(request.url, 'http://localhost');
+      const search = urlObj.searchParams.get('search');
+      if (search) {
+          const q = search.toLowerCase();
+          results = results.filter(p => p.product.brand_name.toLowerCase().includes(q) || p.product.generic_name.toLowerCase().includes(q) || p.batch_number.toLowerCase().includes(q));
+      }
+      return jsonResponse(results);
+  }
   if (path === '/api/countries' && method === 'GET') {
       return jsonResponse([
           { id: 1, name: 'United States', currency_code: 'USD', currency_symbol: '$', tax_name: 'Sales Tax', default_tax_rate: 7.25 },
